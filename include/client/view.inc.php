@@ -3,9 +3,6 @@ if(!defined('OSTCLIENTINC') || !$thisclient || !$ticket || !$ticket->checkUserAc
 
 $info=($_POST && $errors)?Format::htmlchars($_POST):array();
 
-$type = array('type' => 'viewed');
-Signal::send('object.view', $ticket, $type);
-
 $dept = $ticket->getDept();
 
 if ($ticket->isClosed() && !$ticket->isReopenable())
@@ -15,7 +12,7 @@ if ($ticket->isClosed() && !$ticket->isReopenable())
 if(!$dept || !$dept->isPublic())
     $dept = $cfg->getDefaultDept();
 
-//Custom Data    
+//Custom Data
 $sections = $forms = array();
 foreach (DynamicFormEntry::forTicket($ticket->getId()) as $i=>$form) {
     // Skip core fields shown earlier in the ticket view
@@ -33,9 +30,9 @@ foreach (DynamicFormEntry::forTicket($ticket->getId()) as $i=>$form) {
     $forms[$i] = $form->getTitle();
 }
 
-$email = $thisclient->getUserName();
-$clientId = TicketUser::lookupByEmail($email)->getId();
+    $email = $thisclient->getUserName();
+    $clientId = TicketUser::lookupByEmail($email)->getId();
 
-if ($blockReply = $ticket->isChild() && $ticket->getMergeType() != 'visual')
-$warn = sprintf(__('This Ticket is Merged into another Ticket. Please go to the %s%d%s to reply.'),
-    '<a href="tickets.php?id=', $ticket->getPid(), '" style="text-decoration:underline">Parent</a>');
+    if ($blockReply = $ticket->isChild() && $ticket->getMergeType() != 'visual')
+    $warn = sprintf(__('This Ticket is Merged into another Ticket. Please go to the %s%d%s to reply.'),
+        '<a href="tickets.php?id=', $ticket->getPid(), '" style="text-decoration:underline">Parent</a>');

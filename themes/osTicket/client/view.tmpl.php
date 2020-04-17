@@ -5,7 +5,7 @@
     <a href="<?= ROOT_PATH; ?>login.php?e=<?= urlencode($thisclient->getEmail()); ?>" style="text-decoration:underline"><?= __('Sign In'); ?></a>
     <?= sprintf(__('or %s register for an account %s for the best experience on our help desk.'),
         '<a href="account.php?do=create" style="text-decoration:underline">','</a>'); ?>
-</div>
+    </div>
 
 <?php endif; ?>
 
@@ -25,8 +25,8 @@
                         <i class="icon-print"></i> <?= __('Print'); ?></a>
                 <?php // Only ticket owners can edit the ticket details (and other forms) ?>
                 <?php if ($ticket->hasClientEditableFields() && $thisclient->getId() == $ticket->getUserId()): ?>
-                                <a class="action-button" href="tickets.php?a=edit&id=<?= $ticket->getId(); ?>"><i class="icon-edit"></i> <?= __('Edit'); ?></a>
-                <?php endif; ?>
+                    <a class="action-button" href="tickets.php?a=edit&id=<?= $ticket->getId(); ?>"><i class="icon-edit"></i> <?= __('Edit'); ?></a>
+            <?php endif; ?>
 
                 </div>
             </h1>
@@ -78,21 +78,21 @@
     </tr>
     <tr>
         <td colspan="2">
-        <!-- Custom Data -->
-        <?php foreach ($sections as $i=>$answers) :?>
-            <table class="custom-data" cellspacing="0" cellpadding="4" width="100%" border="0">
-                <tr><td colspan="2" class="headline flush-left"><?= $forms[$i]; ?></th></tr>
-            <?php foreach ($answers as $A):
-            list($v, $a) = $A; ?>
-            <tr>
-                <th><?= $a->getField()->get('label');?>:</th>
-                <td><?= $v; ?></td>
-            </tr>
-            <?php endforeach; //answers ?>
+    <!-- Custom Data -->
+    <?php foreach ($sections as $i=>$answers) :?>
+        <table class="custom-data" cellspacing="0" cellpadding="4" width="100%" border="0">
+        <tr><td colspan="2" class="headline flush-left"><?= $forms[$i]; ?></th></tr>
+        <?php foreach ($answers as $A):
+        list($v, $a) = $A; ?>
+        <tr>
+            <th><?= $a->getField()->get('label');?>:</th>
+            <td><?= $v; ?></td>
+        </tr>
+        <?php endforeach; //answers ?>
         </table>
-        <?php endforeach; //sections ?>
-        </td>
-    </tr>
+    <?php endforeach; //sections ?>
+    </td>
+</tr>
 </table>
 <br>
   <?php
@@ -110,32 +110,33 @@
     <div id="msg_warning"><?= $warn; ?></div>
 <?php endif; ?>
 
-<?php if ((!$ticket->isClosed() || $ticket->isReopenable()) && !$blockReply): ?>
-    <form id="reply" action="tickets.php?id=<?= $ticket->getId();?>#reply" name="reply" method="post" enctype="multipart/form-data">
+<?php if (!$ticket->isClosed() || $ticket->isReopenable()): ?>
+<form id="reply" action="tickets.php?id=<?= $ticket->getId();?>#reply" name="reply" method="post" enctype="multipart/form-data">
     <?php csrf_token(); ?>
     <h2><?= __('Post a Reply');?></h2>
     <input type="hidden" name="id" value="<?= $ticket->getId(); ?>">
     <input type="hidden" name="a" value="reply">
     <div>
         <p><em><?= __('To best assist you, we request that you be specific and detailed'); ?></em>
-        <span class="error">*&nbsp;<?php echo $errors['message']; ?></span>
+        <font class="error">*&nbsp;<?= $errors['message']; ?></font>
         </p>
         <textarea name="message" id="message" cols="50" rows="9" wrap="soft"
-            class="<?php if ($cfg->isRichTextEnabled()) echo 'richtext';?> draft" 
+            class="<?= ($cfg->isRichTextEnabled())? 'richtext':'';?> draft"
             <?php
             list($draft, $attrs) = Draft::getDraftAndDataAttrs('ticket.client', $ticket->getId(), $info['message']);
-            echo $attrs; ?>><?php echo $draft ?: $info['message'];?>
-        </textarea>
+            echo $attrs; ?>>
+            <?= $draft ?: $info['message'];
+            ?></textarea>
     <?php
     if ($messageField->isAttachmentsEnabled()) {
         print $attachments->render(array('client'=>true));
     } ?>
     </div>
-    <?php if ($ticket->isClosed() && $ticket->isReopenable()) : ?>
+<?php if ($ticket->isClosed() && $ticket->isReopenable()) : ?>
     <div class="warning-banner">
         <?= __('Ticket will be reopened on message post'); ?>
     </div>
-    <?php endif; ?>
+<?php endif; ?>
     <p style="text-align:center">
         <input type="submit" value="<?= __('Post Reply');?>">
         <input type="reset" value="<?= __('Reset');?>">
@@ -156,5 +157,5 @@ foreach (AttachmentFile::objects()->filter(array(
         'filename' => $file->name,
     );
 } ?>
-showImagesInline(<?php echo JsonDataEncoder::encode($urls); ?>);
+showImagesInline(<?= JsonDataEncoder::encode($urls); ?>);
 </script>

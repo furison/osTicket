@@ -16,9 +16,9 @@ if(!defined('OSTCLIENTINC')) die('Access Denied');
     </div>
     <p>
         <input class="btn" type="submit" value="<?= __('Sign In'); ?>">
-    <?php if ($suggest_pwreset): ?>
+<?php if ($suggest_pwreset): ?>
         <a style="padding-top:4px;display:inline-block;" href="pwreset.php"><?= __('Forgot My Password'); ?></a>
-    <?php endif; ?>
+<?php endif; ?>
     </p>
     </div>
     <div style="display:table-cell;padding: 15px;vertical-align:top">
@@ -30,14 +30,14 @@ if(!defined('OSTCLIENTINC')) die('Access Denied');
     <?php endif ;?>
     <?php if ($cfg && $cfg->isClientRegistrationEnabled()): ?>
         <?= (count($ext_bks)) ? '<hr style="width:70%"/>':''; ?>
-        <div style="margin-bottom: 5px">
-        <?= __('Not yet registered?'); ?> <a href="account.php?do=create"><?= __('Create an account'); ?></a>
-        </div>
+    <div style="margin-bottom: 5px">
+    <?= __('Not yet registered?'); ?> <a href="account.php?do=create"><?= __('Create an account'); ?></a>
+    </div>
     <?php endif; //isClientRegistrationEnabled() ?>
-        <div>
-            <b><?= __("I'm an agent"); ?></b> —
-            <a href="<?= ROOT_PATH; ?>scp/"><?= __('sign in here'); ?></a>
-        </div>
+    <div>
+    <b><?= __("I'm an agent"); ?></b> —
+    <a href="<?= ROOT_PATH; ?>scp/"><?= __('sign in here'); ?></a>
+    </div>
     </div>
 </div>
 </form>

@@ -6,9 +6,9 @@ if(!defined('OSTCLIENTINC')) die('Access Denied');
 <h1><?= __('Check Ticket Status'); ?></h1>
 <p><?= __('Please provide your email address and a ticket number.'); ?>
 <?php if ($cfg->isClientEmailVerificationRequired()): ?>
-    <?= __('An access link will be emailed to you.') ;?>
+    <?= ' '.__('An access link will be emailed to you.'); ?>
 <?php else: ?>
-    <?= __('This will sign you in to view your ticket.'); ?>
+    <?= ' '.__('This will sign you in to view your ticket.'); ?>
 <?php endif;?>
 </p>
 <form action="login.php" method="post" id="clientLogin">
@@ -36,8 +36,8 @@ if(!defined('OSTCLIENTINC')) die('Access Denied');
         <a href="login.php"><?= __('Sign In'); ?></a> 
         <?php if ($cfg->isClientRegistrationEnabled()): ?>
         <?= sprintf(__('or %s register for an account %s to access all your tickets.'),'<a href="account.php?do=create">','</a>'); ?>
-        <?php endif; //getClientRegistrationEnabled ?>
-    <?php endif; //getClientRegistrationMode?>
+    <?php endif; //getClientRegistrationEnabled ?>
+<?php endif; //getClientRegistrationMode?>
     </div>
 </div>
 </form>

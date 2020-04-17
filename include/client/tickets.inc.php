@@ -136,5 +136,5 @@ $tickets->values(
     'dept__name', 'dept__ispublic', 'user__default_email__address', 'user_id'
 );
 
-$subject_field = TicketForm::objects()->one()->getField('subject');
-$defaultDept=Dept::getDefaultDeptName(); //Default public dept.
+     $subject_field = TicketForm::objects()->one()->getField('subject');
+     $defaultDept=Dept::getDefaultDeptName(); //Default public dept.

@@ -1,62 +1,63 @@
 <div class="search well">
-    <div class="flush-left">
-    <form action="tickets.php" method="get" id="ticketSearchForm">
-        <input type="hidden" name="a"  value="search">
-        <input type="text" name="keywords" size="30" value="<?= Format::htmlchars($settings['keywords']); ?>">
-        <input type="submit" value="<?= __('Search');?>">
-        <div class="pull-right">
-            <?= __('Help Topic'); ?>:
-            <select name="topic_id" class="nowarn" onchange="javascript: this.form.submit(); ">
-                <option value="">&mdash; <?= __('All Help Topics');?> &mdash;</option>
-            <?php foreach (Topic::getHelpTopics(true) as $id=>$name): ?>
-                <?php if ($count == 0) continue;?>
-                <option value="<?= $id; ?>"
-                    <?php if ($settings['topic_id'] == $id) echo 'selected="selected"'; ?>
-                    ><?= sprintf('%s (%d)', Format::htmlchars($name), $thisclient->getNumTopicTickets($id)); ?></option>
-            <?php endforeach; ?>
-            </select>
-        </div>
-    </form>
-    </div>
+<div class="flush-left">
+<form action="tickets.php" method="get" id="ticketSearchForm">
+    <input type="hidden" name="a"  value="search">
+    <input type="text" name="keywords" size="30" value="<?=  Format::htmlchars($settings['keywords']); ?>">
+    <input type="submit" value="<?= __('Search');?>">
+<div class="pull-right">
+    <?= __('Help Topic'); ?>:
+    <select name="topic_id" class="nowarn" onchange="javascript: this.form.submit(); ">
+        <option value="">&mdash; <?= __('All Help Topics');?> &mdash;</option>
+<?php foreach (Topic::getHelpTopics(true) as $id=>$name): ?>
+        <?php if (($count =$thisclient->getNumTopicTickets($id, $org_tickets)) == 0)
+            continue;?>
+        <option value="<?= $id; ?>"
+            <?php if ($settings['topic_id'] == $id) echo 'selected="selected"'; ?>
+            ><?= sprintf('%s (%d)', Format::htmlchars($name), $thisclient->getNumTopicTickets($id)); ?></option>
+<?php endforeach; ?>
+    </select>
+</div>
+</form>
+</div>
 
-    <?php if ($settings['keywords'] || $settings['topic_id'] || $_REQUEST['sort']): ?>
-    <div style="margin-top:10px"><strong><a href="?clear" style="color:#777"><i class="icon-remove-circle"></i> <?= __('Clear all filters and sort'); ?></a></strong></div>
-    <?php endif; ?>
+<?php if ($settings['keywords'] || $settings['topic_id'] || $_REQUEST['sort']): ?>
+<div style="margin-top:10px"><strong><a href="?clear" style="color:#777"><i class="icon-remove-circle"></i> <?=  __('Clear all filters and sort'); ?></a></strong></div>
+<?php endif; ?>
 
 </div>
 
 
 <h1 style="margin:10px 0">
     <a href="<?= Format::htmlchars($_SERVER['REQUEST_URI']); ?>">
-        <i class="refresh icon-refresh"></i>
-        <?= __('Tickets'); ?>
+    <i class="refresh icon-refresh"></i>
+    <?= __('Tickets'); ?>
     </a>
 
-    <div class="pull-right states">
-        <small>
-    <?php if ($openTickets) : ?>
-        <i class="icon-file-alt"></i>
-        <a class="state <?= ($status == 'open')? 'active': ''; ?>"
-            href="?<?= Http::build_query(array('a' => 'search', 'status' => 'open')); ?>">
-        <?= _P('ticket-status', 'Open'); ?>
-        <?= ($openTickets > 0)? sprintf(' (%d)', $openTickets):''; ?>
-        </a>
-        <?php if ($closedTickets): ?>
-        &nbsp;
-        <span style="color:lightgray">|</span>
-        <?php endif; ?>
-    <?php endif; ?>
+<div class="pull-right states">
+    <small>
+<?php if ($openTickets) : ?>
+    <i class="icon-file-alt"></i>
+    <a class="state <?= ($status == 'open')? 'active': ''; ?>"
+        href="?<?= Http::build_query(array('a' => 'search', 'status' => 'open')); ?>">
+    <?= _P('ticket-status', 'Open'); ?>
+    <?= ($openTickets > 0)? sprintf(' (%d)', $openTickets):''; ?>
+    </a>
     <?php if ($closedTickets): ?>
-        &nbsp;
-        <i class="icon-file-text"></i>
-        <a class="state <?= ($status == 'closed')? 'active': ''; ?>"
-            href="?<?= Http::build_query(array('a' => 'search', 'status' => 'closed')); ?>">
-        <?= __('Closed'); ?>
-        <?= ($closedTickets > 0)? sprintf(' (%d)', $closedTickets): ''; ?>
-        </a>
+    &nbsp;
+    <span style="color:lightgray">|</span>
     <?php endif; ?>
-        </small>
-    </div>
+<?php endif; ?>
+<?php if ($closedTickets): ?>
+    &nbsp;
+    <i class="icon-file-text"></i>
+    <a class="state <?= ($status == 'closed')? 'active': ''; ?>"
+        href="?<?= Http::build_query(array('a' => 'search', 'status' => 'closed')); ?>">
+    <?= __('Closed'); ?>
+    <?= ($closedTickets > 0)? sprintf(' (%d)', $closedTickets): ''; ?>
+    </a>
+<?php endif; ?>
+    </small>
+</div>
 </h1>
 <table id="ticketTable" width="800" border="0" cellspacing="0" cellpadding="0">
     <caption><?= $showing; ?></caption>
@@ -69,7 +70,7 @@
                 <a href="tickets.php?sort=date&order=<?= $negorder; ?><?= $qstr; ?>" title="Sort By Date"><?= __('Create Date');?>&nbsp;<i class="icon-sort"></i></a>
             </th>
             <th width="100">
-                <a href="tickets.php?sort=status&order=<?= $negorder; ?><?= $qstr; ?>" title="Sort By Status"><?= __('Status');?>&nbsp;<i class="icon-sort"></i></a>
+                <a href="tickets.php?sort=status&order=<?= $negorder; ?><?= $qstr; ?>" title="Sort By Status"><?= _('Status');?>&nbsp;<i class="icon-sort"></i></a>
             </th>
             <th width="320">
                 <a href="tickets.php?sort=subject&order=<?= $negorder; ?><?= $qstr; ?>" title="Sort By Subject"><?= __('Subject');?>&nbsp;<i class="icon-sort"></i></a>
@@ -115,7 +116,7 @@
                 </td>
                 <td><span class="truncate"><?= $dept; ?></span></td>
             </tr>
-        <?php } ?>
+            <?php } ?>
     <?php else: ?>
         <tr><td colspan="5"><?= __('Your query did not match any records'); ?></td></tr>
     <?php endif; ?>
