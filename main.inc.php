@@ -63,4 +63,7 @@ if ($_SESSION['::sysmsgs']) {
     extract($_SESSION['::sysmsgs']);
     unset($_SESSION['::sysmsgs']);
 }
+
+// initialize the theme
+$theme = new Theme();
 ?>

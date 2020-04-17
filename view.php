@@ -43,8 +43,19 @@ if (@$user && is_object($user) && $user->getTicketId())
 $nav = new UserNav();
 $nav->setActiveNav('status');
 
-$inc = 'accesslink.inc.php';
-require CLIENTINC_DIR.'header.inc.php';
-require CLIENTINC_DIR.$inc;
-require CLIENTINC_DIR.'footer.inc.php';
+$theme->renderHeader('client', $ost, $cfg, $nav);
+
+if ($cfg->isClientEmailVerificationRequired())
+    $button = __("Email Access Link");
+else
+    $button = __("View Ticket");
+
+$theme->render('client', 'accesslink', array(
+    'email'     => Format::input($_POST['lemail']?$_POST['lemail']:$_GET['e']),
+    'ticketid'  => Format::input($_POST['lticket']?$_POST['lticket']:$_GET['t']),
+    'cfg'       => $cfg,
+    'button'    => $button,
+));
+
+$theme->renderFooter('client', $ost);
 ?>

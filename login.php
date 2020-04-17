@@ -24,11 +24,35 @@ define('OSTCLIENTINC',TRUE); //make includes happy
 require_once(INCLUDE_DIR.'class.client.php');
 require_once(INCLUDE_DIR.'class.ticket.php');
 
+if (!$nav) {
+    $nav = new UserNav();
+    $nav->setActiveNav('status');
+}
+
 if ($cfg->getClientRegistrationMode() == 'disabled'
-        || isset($_POST['lticket']))
-    $inc = 'accesslink.inc.php';
-else
-    $inc = 'login.inc.php';
+        || isset($_POST['lticket'])) {
+    //$inc = 'accesslink.inc.php';
+    $template = 'accesslink';
+    $data = array(
+        'email'     => Format::input($_POST['lemail']?$_POST['lemail']:$_GET['e']),
+        'ticketid'  => Format::input($_POST['lticket']?$_POST['lticket']:$_GET['t']),
+        'cfg'       => $cfg,
+        'button'    => $button,
+        'nav'       => $nav,
+    );
+} else {
+    include CLIENTINC_DIR.'login.inc.php';
+    $template = 'login';
+    $data = array(
+        'email'     => Format::input($_POST['luser']?:$_GET['e']),
+        'passwd'    => Format::input($_POST['lpasswd']?:$_GET['t']),
+        'ext_bks'   => $ext_bks,
+        'title'     => $title,
+        'body'      => $body,
+        'cfg'       => $cfg,
+        'nav'       => $nav,
+    );
+}
 
 $suggest_pwreset = false;
 
@@ -53,12 +77,18 @@ if ($_POST && isset($_POST['luser'])) {
         if ($user instanceof ClientCreateRequest) {
             if ($cfg && $cfg->isClientRegistrationEnabled()) {
                 // Attempt to automatically register
-                if ($user->attemptAutoRegister())
+                if ($user->attemptAutoRegister()) {
                     Http::redirect('tickets.php');
-
+                }
                 // Auto-registration failed. Show the user the info we have
-                $inc = 'register.inc.php';
+                include CLIENTINC_DIR.'register.inc.php';
                 $user_form = UserForm::getUserForm()->getForm($user->getInfo());
+                $data = array(
+                    'user_form' => $user_form,
+                    'errors'    => $errors,
+                    'info'      => $info,
+
+                );
             }
             else {
                 $errors['err'] = __('Access Denied. Contact your help desk administrator to have an account registered for you');
@@ -120,12 +150,19 @@ elseif ($user = UserAuthenticationBackend::processSignOn($errors, false)) {
     elseif ($user instanceof ClientCreateRequest) {
         if ($cfg && $cfg->isClientRegistrationEnabled()) {
             // Attempt to automatically register
-            if ($user->attemptAutoRegister())
+            if ($user->attemptAutoRegister()) {
                 Http::redirect('tickets.php');
-
+            }
             // Unable to auto-register. Fill in what we have and let the
             // user complete the info
-            $inc = 'register.inc.php';
+            include CLIENTINC_DIR.'register.inc.php';
+            $user_form = UserForm::getUserForm()->getForm($user->getInfo());
+            $template = 'register';
+            $data = array(
+                'user_form' => $user_form,
+                'errors'    => $errors,
+                'info'      => $info,
+            );
         }
         else {
             $errors['err'] = __('Access Denied. Contact your help desk administrator to have an account registered for you');
@@ -146,7 +183,7 @@ if (!$nav) {
 // Browsers shouldn't suggest saving that username/password
 Http::response(422);
 
-require CLIENTINC_DIR.'header.inc.php';
-require CLIENTINC_DIR.$inc;
-require CLIENTINC_DIR.'footer.inc.php';
+$theme->renderHeader('client', $ost, $cfg);
+$theme->render('client', $template, $data);
+$theme->renderFooter('client', $ost)
 ?>

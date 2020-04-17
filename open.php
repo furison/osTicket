@@ -26,7 +26,7 @@ if ($_POST) {
         if(!$_POST['captcha'])
             $errors['captcha']=__('Enter text shown on the image');
         elseif(strcmp($_SESSION['captcha'], md5(strtoupper($_POST['captcha']))))
-            $errors['captcha']=sprintf('%s - %s', __('Invalid'), __('Please try again!'));
+        $errors['captcha']=sprintf('%s - %s', __('Invalid'), __('Please try again!'));
     }
 
     $tform = TicketForm::objects()->one()->getForm($vars);
@@ -71,7 +71,7 @@ if ($cfg->isClientLoginRequired()) {
     }
 }
 
-require(CLIENTINC_DIR.'header.inc.php');
+$theme->renderHeader('client', $ost, $cfg);
 if ($ticket
     && (
         (($topic = $ticket->getTopic()) && ($page = $topic->getPage()))
@@ -88,6 +88,12 @@ if ($ticket
 }
 else {
     require(CLIENTINC_DIR.'open.inc.php');
+    $theme->render('client', 'open', array(
+        'thisclient'=> $thisclient,
+        'errors'    => $errors,
+        'forms'     => $forms,
+        'cfg'       => $cfg,
+    ));
 }
-require(CLIENTINC_DIR.'footer.inc.php');
+$theme->renderFooter('client', $ost);
 ?>

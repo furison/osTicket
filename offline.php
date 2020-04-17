@@ -20,7 +20,7 @@ if(is_object($ost) && $ost->isSystemOnline()) {
     exit;
 }
 $nav=null;
-require(CLIENTINC_DIR.'header.inc.php');
+$theme->renderHeader('client', $ost, $cfg);
 ?>
 <div id="landing_page">
 <?php
@@ -31,4 +31,4 @@ if(($page=$cfg->getOfflinePage())) {
 }
 ?>
 </div>
-<?php require(CLIENTINC_DIR.'footer.inc.php'); ?>
+<?php $theme->renderFooter('client', $ost); ?> 

@@ -19,6 +19,11 @@
 require 'client.inc.php';
 
 $inc = 'register.inc.php';
+$template = 'register';
+$data = array(
+    'errors'    => $errors,
+    'info'      => $info,
+);
 
 $errors = array();
 
@@ -33,6 +38,7 @@ elseif ($thisclient) {
             if ($f->get('object_type') == 'U') {
                 $user_form = $f;
                 $user_form->getField('email')->configure('disabled', true);
+                $data['user_form'] = $user_form;
             }
         }
     }
@@ -40,8 +46,15 @@ elseif ($thisclient) {
     else {
         $user = User::lookup($thisclient->getId());
         $content = Page::lookupByType('registration-thanks');
-        $inc = isset($_GET['confirmed'])
-            ? 'register.confirmed.inc.php' : 'profile.inc.php';
+        $template = isset($_GET['confirmed'])
+            ? 'register.confirmed' : 'profile';
+        $inc = null;
+        $data = array(
+            'content'   => $content,
+            'user'      => $user,
+            'thisclient'=> $thisclient,
+            'cfg'       => $cfg
+        );
     }
 }
 
@@ -102,8 +115,13 @@ elseif ($_POST) {
         switch ($_POST['do']) {
         case 'create':
             $content = Page::lookupByType('registration-confirm');
-            $inc = 'register.confirm.inc.php';
+            $template = 'register.confirm';
+            $inc = null;
+            $data = array(
+                'content'   => $content,
+            );
             $acct->sendConfirmEmail();
+
             break;
         case 'import':
             if ($bk = UserAuthenticationBackend::getBackend($_POST['backend'])) {
@@ -122,6 +140,9 @@ elseif ($_POST) {
         $user->delete();
 }
 
-include(CLIENTINC_DIR.'header.inc.php');
-include(CLIENTINC_DIR.$inc);
-include(CLIENTINC_DIR.'footer.inc.php');
+$theme->renderHeader('client', $ost, $cfg);
+if ($inc !== null) {
+    include(CLIENTINC_DIR.$inc);
+}
+$theme->render('client', $template, $data);
+$theme->renderFooter('client', $ost);

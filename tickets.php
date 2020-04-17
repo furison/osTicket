@@ -127,24 +127,65 @@ $nav->setActiveNav('tickets');
 if($ticket && $ticket->checkUserAccess($thisclient)) {
     if (isset($_REQUEST['a']) && $_REQUEST['a'] == 'edit'
             && $ticket->hasClientEditableFields()) {
-        $inc = 'edit.inc.php';
+        
         if (!$forms) $forms=DynamicFormEntry::forTicket($ticket->getId());
         // Auto add new fields to the entries
         foreach ($forms as $form) {
             $form->filterFields(function($f) { return !$f->isStorable(); });
             $form->addMissingFields();
         }
+        $template = 'edit';
+        $data = array(
+            'forms'     => $forms,
+            'ticket'    => $ticket,
+        );
     }
-    else
-        $inc='view.inc.php';
+    else {
+        include (CLIENTINC_DIR.'view.inc.php');
+        $template = 'view';
+        $data = array(
+            'thisclient'=> $thisclient,
+            'ticket'    => $ticket,
+            'sections'  => $sections,
+            'clientId'  => $clientId,
+            'messageField'=> $messageField,
+            'attachments'=> $attachments,
+            'errors'    => $errors,
+            'msg'       => $msg,
+            'warn'      => $warn,
+            'forms'     => $forms,
+            'cfg'       => $cfg,
+        );
+    }   
 } elseif($thisclient->getNumTickets($thisclient->canSeeOrgTickets())) {
-    $inc='tickets.inc.php';
+    include(CLIENTINC_DIR.'tickets.inc.php');
+    $template = 'tickets';
+    $data = array(
+        'thisclient'    => $thisclient,
+        'settings'      => $settings,
+        'count'         => $thisclient->getNumTopicTickets($id, $org_tickets),
+        'openTickets'   => $openTickets,
+        'closedTickets' => $closedTickets,
+        'showing'       => $showing,
+        'negorder'      => $negorder,
+        'qstr'          => $qstr,
+        'tickets'       => $tickets,
+        'subject_field' => $subject_field,
+        'defaultDept'   => $defaultDept,
+    );
 } else {
     $nav->setActiveNav('new');
-    $inc='open.inc.php';
+    include(CLIENTINC_DIR.'open.inc.php');
+    $template = 'open';
+    $data = array(
+        'thisclient'=> $thisclient,
+        'errors'    => $errors,
+        'forms'     => $forms,
+        'cfg'       => $cfg,
+    );
 }
-include(CLIENTINC_DIR.'header.inc.php');
-include(CLIENTINC_DIR.$inc);
+$theme->renderHeader('client', $ost, $cfg, $nav, $errors);
+$theme->render('client', $template, $data);
 print $tform->getMedia();
-include(CLIENTINC_DIR.'footer.inc.php');
+$theme->renderFooter('client', $ost);
 ?>
