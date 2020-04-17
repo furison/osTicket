@@ -1467,7 +1467,8 @@ class TextboxField extends FormField {
                 __('Enter a valid phone number')),
             'ip' =>     array(array('Validator', 'is_ip'),
                 __('Enter a valid IP address')),
-            'number' => array('is_numeric', __('Enter a number')),
+            'number' => array(array('Validator', 'is_numeric'),
+                __('Enter a number')),
             'password' => array(array('Validator', 'check_passwd'),
                 __('Invalid Password')),
             'regex' => array(
@@ -1502,7 +1503,7 @@ class TextboxField extends FormField {
     }
 
     function parse($value) {
-        return Format::striptags($value);
+        return Format::strip_emoticons(Format::striptags($value));
     }
 
     function display($value) {
@@ -2080,6 +2081,28 @@ class NumericField extends FormField {
                         ),
             )),
         );
+    }
+
+    function getSearchQ($method, $value, $name=false) {
+        switch ($method) {
+        case 'equal':
+            return new Q(array(
+                "{$name}__exact" => intval($value)
+            ));
+        break;
+        case 'greater':
+            return Q::any(array(
+                "{$name}__gt" => intval($value)
+            ));
+        break;
+        case 'less':
+            return Q::any(array(
+                "{$name}__lt" => intval($value)
+            ));
+        break;
+        default:
+            return parent::getSearchQ($method, $value, $name);
+        }
     }
 }
 
@@ -2712,7 +2735,7 @@ class ThreadEntryField extends FormField {
 
     function getWidget($widgetClass=false) {
         if ($hint = $this->getLocal('hint'))
-            $this->set('placeholder', $hint);
+            $this->set('placeholder', Format::striptags($hint));
         $this->set('hint', null);
         $widget = parent::getWidget($widgetClass);
         return $widget;
@@ -4234,7 +4257,7 @@ class TextareaWidget extends Widget {
         <span style="display:inline-block;width:100%">
         <textarea <?php echo $rows." ".$cols." ".$maxlength." ".$class
                 .' '.Format::array_implode('=', ' ', $attrs)
-                .' placeholder="'.$config['placeholder'].'"'; ?>
+                .' placeholder="'.$this->field->getLocal('placeholder', $config['placeholder']).'"'; ?>
             id="<?php echo $this->id; ?>"
             name="<?php echo $this->name; ?>"><?php
                 echo Format::htmlchars($this->value);

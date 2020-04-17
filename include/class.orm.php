@@ -2262,10 +2262,11 @@ class SqlCompiler {
     );
 
     function __construct($options=false) {
-        if ($options)
+        if (is_array($options)) {
             $this->options = array_merge($this->options, $options);
-        if ($options['subquery'])
-            $this->alias_num += 150;
+            if (isset($options['subquery']))
+                $this->alias_num += 150;
+        }
     }
 
     function getParent() {
@@ -2539,6 +2540,7 @@ class SqlCompiler {
         $filter = array();
         $type = CompiledExpression::TYPE_WHERE;
         foreach ($Q->constraints as $field=>$value) {
+            $fieldName = $field;
             // Handle nested constraints
             if ($value instanceof Q) {
                 $filter[] = $T = $this->compileQ($value, $model,
@@ -2580,7 +2582,12 @@ class SqlCompiler {
                     // This constraint has to go in the HAVING clause
                     $field = $field->toSql($this, $model);
                     $type = CompiledExpression::TYPE_HAVING;
+                } elseif ($field instanceof QuerySet) {
+                    // Constraint on a subquery goes to HAVING clause
+                    list($field) = static::splitCriteria($fieldName);
+                    $type = CompiledExpression::TYPE_HAVING;
                 }
+
                 if ($value === null)
                     $filter[] = sprintf('%s IS NULL', $field);
                 elseif ($value instanceof SqlField)
