@@ -20,6 +20,7 @@ if (!$thisstaff->hasPerm(User::PERM_DIRECTORY))
 require_once INCLUDE_DIR.'class.note.php';
 
 $user = null;
+$errors = null;
 if ($_REQUEST['id'] && !($user=User::lookup($_REQUEST['id'])))
     $errors['err'] = sprintf(__('%s: Unknown or invalid'), _N('end user', 'end users', 1));
 
@@ -186,9 +187,8 @@ if ($_POST) {
             .' '.__('Internal error occurred');
 }
 
-$page = 'users.inc.php';
 if ($user ) {
-    $page = 'user-view.inc.php';
+    
     switch (strtolower($_REQUEST['t'])) {
     case 'tickets':
         if (isset($_SERVER['HTTP_X_PJAX'])) {
@@ -205,10 +205,39 @@ if ($user ) {
         }
         break;
     }
+    require(STAFFINC_DIR.'user-view.inc.php');
+    $template = 'user-view';
+    $data = array(
+        'account'       => $account,
+        'org'           => $org,
+        'extras'        => $extras,
+        'user'          => $user,
+        'pageNav'       => $pageNav,
+        'subject_field' => $subject_field,
+        'total'         => $total,
+        'thisstaff'     => $thisstaff,
+    );
+}
+else {
+    require(STAFFINC_DIR.'users.inc.php');
+    $template = 'users';
+    $data = array(
+        'showing'       => $showing,
+        'qstr'          => $qstr,
+        'qhash'         => $qhash,
+        'name_sort'     => $name_sort,
+        'status_sort'   => $status_sort,
+        'create_sort'   => $create_sort,
+        'update_sort'   => $update_sort,
+        'users'         => $users,
+        'pageNav'       => $pageNav,
+        'thisstaff'     => $thisstaff,
+        'cfg'           => $cfg,
+    );
 }
 
 $nav->setTabActive('users');
-require(STAFFINC_DIR.'header.inc.php');
-require(STAFFINC_DIR.$page);
-include(STAFFINC_DIR.'footer.inc.php');
+$theme->renderHeader('staff', $ost, $cfg, $nav, $errors, $thisstaff);
+$theme->render('staff', $template, $data);
+$theme->renderFooter('staff', $ost, $thisstaff);
 ?>

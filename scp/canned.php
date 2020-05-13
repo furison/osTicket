@@ -174,17 +174,45 @@ if ($_POST) {
     }
 }
 
-$page='cannedresponses.inc.php';
 $tip_namespace = 'knowledgebase.canned_response';
 if($canned || ($_REQUEST['a'] && !strcasecmp($_REQUEST['a'],'add'))) {
-    $page='cannedresponse.inc.php';
+    require(STAFFINC_DIR.'cannedresponse.inc.php');
+    $template = 'cannedresponse';
+    $data = array(
+        'title'     => $title,
+        'info'      => $info,
+        'action'    => $action,
+        'errors'    => $errors,
+        'canned_form'=> $canned_form,
+        'thisstaff' => $thisstaff,
+    );
+}
+else {
+    require(STAFFINC_DIR.'cannedresponses.inc.php');
+    $template = 'cannedresponses';
+    $data = array(
+        'qst'           => $qst,
+        'title_sort'    => $title_sort,
+        'status_sort'   => $status_sort,
+        'dept_sort'     => $dept_sort,
+        'updated_sort'  => $updated_sort,
+        'rows'          => $rows,
+        'res'           => $res,
+        'num'           => $num,
+        'errors'        => $errors,
+        'pageNav'       => $pageNav,
+        'thisstaff'     => $thisstaff,
+    );
 }
 
 $nav->setTabActive('kbase');
 $ost->addExtraHeader('<meta name="tip-namespace" content="' . $tip_namespace . '" />',
     "$('#content').data('tipNamespace', '".$tip_namespace."');");
-require(STAFFINC_DIR.'header.inc.php');
-require(STAFFINC_DIR.$page);
+//require(STAFFINC_DIR.'header.inc.php');
+$theme->renderHeader('staff', $ost, $cfg, $nav, $errors, $thisstaff);
+//require(STAFFINC_DIR.$page);
+$theme->render('staff', $template, $data);
 print $canned_form->getMedia();
-include(STAFFINC_DIR.'footer.inc.php');
+//include(STAFFINC_DIR.'footer.inc.php');
+$theme->renderFooter('staff', $ost, $thisstaff);
 ?>

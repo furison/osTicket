@@ -107,5 +107,14 @@ elseif (!$thisstaff || !($thisstaff->getId() || $thisstaff->isValid())) {
 Http::response(422);
 
 define("OSTSCPINC",TRUE); //Make includes happy!
-include_once(INCLUDE_DIR.'staff/login.tpl.php');
+//include_once(INCLUDE_DIR.'staff/login.tpl.php');
+include(INCLUDE_DIR.'staff/login.inc.php');
+$theme->render('staff','login',array(
+    'info'      => $info,
+    'ext_bks'   => $ext_bks,
+    'msg'       => $msg,
+    'content'   => $content,
+    'cfg'       => $cfg,
+    'ost'       => $ost,
+));
 ?>

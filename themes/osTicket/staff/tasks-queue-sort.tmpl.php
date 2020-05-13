@@ -1,7 +1,7 @@
 
-<span class="action-button muted" data-dropdown="#sort-dropdown" data-toggle="tooltip" title="<?php echo $sort_options[$sort_cols]; ?>">
+<span class="action-button muted" data-dropdown="#sort-dropdown" data-toggle="tooltip" title="<?= $sort_options[$sort_cols]; ?>">
   <i class="icon-caret-down pull-right"></i>
-  <span><i class="icon-sort-by-attributes-alt <?php if ($sort_dir) echo 'icon-flip-vertical'; ?>"></i> <?php echo __('Sort');?></span>
+  <span><i class="icon-sort-by-attributes-alt <?php if ($sort_dir) echo 'icon-flip-vertical'; ?>"></i> <?= __('Sort');?></span>
 </span>
 <div id="sort-dropdown" class="action-dropdown anchor-right"
 onclick="javascript:
@@ -26,7 +26,7 @@ return false;">
     ?>>
         <a href="#" data-mode="<?php echo $mode; ?>" data-dir="<?php echo $dir; ?>">
           <i class="icon-fixed-width <?php echo $icon; ?>"
-          ></i> <?php echo Format::htmlchars($desc); ?></a>
+          ></i> <?= Format::htmlchars($desc); ?></a>
       </li>
     <?php } ?>
  </ul>

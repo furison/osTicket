@@ -11,7 +11,7 @@
     <?php endif; ?>
     <meta name="description" content="customer support platform">
     <meta name="keywords" content="osTicket, Customer support system, support ticket system">
-    <?php if ($type == 'client'): ?>
+    <?php if ($template_type == 'client'): ?>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php endif; ?>
     <title><?= Format::htmlchars($title); ?></title>
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="<?= $THEME_ROOT; ?>js/jquery-ui-1.12.1.custom.min.js?f1e9e88"></script>
     <script type="text/javascript" src="<?= $THEME_ROOT; ?>js/jquery-ui-timepicker-addon.js?f1e9e88"></script>
     <script type="text/javascript" src="<?= $THEME_ROOT; ?>js/bootstrap-typeahead.js?f1e9e88"></script>
-    <?php if ($type == 'staff'): //add extra javascript ?>
+    <?php if ($template_type == 'staff'): //add extra javascript ?>
         <script type="text/javascript" src="<?= $THEME_ROOT; ?>js/jquery.pjax.js?f1e9e88"></script>
         <script type="text/javascript" src=" <?= $THEME_ROOT;?>js/scp.js?f1e9e88"></script>
         <script type="text/javascript" src="<?= $THEME_ROOT; ?>js/tips.js?f1e9e88"></script>

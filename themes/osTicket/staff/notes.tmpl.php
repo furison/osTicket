@@ -2,7 +2,11 @@
 <?php
 $show_options = true;
 foreach ($notes as $note) {
-    include STAFFINC_DIR."templates/note.tmpl.php";
+    //include STAFFINC_DIR."templates/note.tmpl.php";
+    $theme->render('staff', 'note', array(
+        'note'  => $note,
+        'show_options'  => $show_options
+    ));
 } ?>
 </div>
 <div id="new-note-box">

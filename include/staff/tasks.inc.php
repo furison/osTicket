@@ -279,238 +279,35 @@ if ($thisstaff->hasPerm(Task::PERM_DELETE, false)) {
             ));
 }
 
-
-?>
-<!-- SEARCH FORM START -->
-<div id='basic_search'>
-  <div class="pull-right" style="height:25px">
-    <span class="valign-helper"></span>
-    <?php
-        require STAFFINC_DIR.'templates/tasks-queue-sort.tmpl.php';
-    ?>
-   </div>
-    <form action="tasks.php" method="get" onsubmit="javascript:
-        $.pjax({
-        url:$(this).attr('action') + '?' + $(this).serialize(),
-        container:'#pjax-container',
-        timeout: 2000
-        });
-        return false;">
-        <input type="hidden" name="a" value="search">
-        <input type="hidden" name="search-type" value=""/>
-        <div class="attached input">
-            <input type="text" class="basic-search" data-url="ajax.php/tasks/lookup" name="query"
-                   autofocus size="30" value="<?php echo Format::htmlchars($_REQUEST['query'], true); ?>"
-                   autocomplete="off" autocorrect="off" autocapitalize="off">
-            <button type="submit" class="attached button"><i class="icon-search"></i>
-            </button>
-        </div>
-    </form>
-
-</div>
-<!-- SEARCH FORM END -->
-<div class="clear"></div>
-<div style="margin-bottom:20px; padding-top:5px;">
-<div class="sticky bar opaque">
-    <div class="content">
-        <div class="pull-left flush-left">
-            <h2><a href="<?php echo $refresh_url; ?>"
-                title="<?php echo __('Refresh'); ?>"><i class="icon-refresh"></i> <?php echo
-                $results_type.$showing; ?></a></h2>
-        </div>
-        <div class="pull-right flush-right">
-           <?php
-           if ($count)
-                echo Task::getAgentActions($thisstaff, array('status' => $status));
-            ?>
-        </div>
-    </div>
-</div>
-<div class="clear"></div>
-<form action="tasks.php" method="POST" name='tasks' id="tasks">
-<?php csrf_token(); ?>
- <input type="hidden" name="a" value="mass_process" >
- <input type="hidden" name="do" id="action" value="" >
- <input type="hidden" name="status" value="<?php echo
- Format::htmlchars($_REQUEST['status'], true); ?>" >
- <table class="list" border="0" cellspacing="1" cellpadding="2" width="940">
-    <thead>
-        <tr>
-            <?php if ($thisstaff->canManageTickets()) { ?>
-	        <th width="4%">&nbsp;</th>
-            <?php } ?>
-
-            <?php
-            // Query string
-            unset($args['sort'], $args['dir'], $args['_pjax']);
-            $qstr = Http::build_query($args);
-            // Show headers
-            foreach ($queue_columns as $k => $column) {
-                echo sprintf( '<th width="%s"><a href="?sort=%s&dir=%s&%s"
-                        class="%s">%s</a></th>',
-                        $column['width'],
-                        $column['sort'] ?: $k,
-                        $column['sort_dir'] ? 0 : 1,
-                        $qstr,
-                        isset($column['sort_dir'])
-                        ? ($column['sort_dir'] ? 'asc': 'desc') : '',
-                        $column['heading']);
-            }
-            ?>
-        </tr>
-     </thead>
-     <tbody>
-        <?php
-        // Setup Subject field for display
-        $total=0;
+        $total_tasks=0;
         $title_field = TaskForm::getInstance()->getField('title');
         $ids=($errors && $_POST['tids'] && is_array($_POST['tids']))?$_POST['tids']:null;
+        $my_tasks = array();
         foreach ($tasks as $T) {
             $T['isopen'] = ($T['flags'] & TaskModel::ISOPEN != 0); //XXX:
-            $total += 1;
-            $tag=$T['staff_id']?'assigned':'openticket';
-            $flag=null;
+            $my_tasks[$total_tasks] = $T;
+            $my_tasks[$total_tasks]['tag']=$T['staff_id']?'assigned':'openticket';
+            $my_tasks[$total_tasks]['flag']=null;
             if($T['lock__staff_id'] && $T['lock__staff_id'] != $thisstaff->getId())
-                $flag='locked';
+                $my_tasks[$total_tasks]['flag']='locked';
             elseif($T['isoverdue'])
-                $flag='overdue';
+                $my_tasks[$total_tasks]['flag']='overdue';
 
             $assignee = '';
-            $dept = Dept::getLocalById($T['dept_id'], 'name', $T['dept__name']);
+            $my_tasks[$total_tasks]['dept'] = Dept::getLocalById($T['dept_id'], 'name', $T['dept__name']);
             $assinee ='';
             if ($T['staff_id']) {
-                $staff =  new AgentsName($T['staff__firstname'].' '.$T['staff__lastname']);
-                $assignee = sprintf('<span class="Icon staffAssigned">%s</span>',
+                $my_tasks[$total_tasks]['staff'] =  new AgentsName($T['staff__firstname'].' '.$T['staff__lastname']);
+                $my_tasks[$total_tasks]['assignee'] = sprintf('<span class="Icon staffAssigned">%s</span>',
                         Format::truncate((string) $staff, 40));
             } elseif($T['team_id']) {
-                $assignee = sprintf('<span class="Icon teamAssigned">%s</span>',
+                $my_tasks[$total_tasks]['assignee'] = sprintf('<span class="Icon teamAssigned">%s</span>',
                     Format::truncate(Team::getLocalById($T['team_id'], 'name', $T['team__name']),40));
             }
 
-            $threadcount=$T['thread_count'];
-            $number = $T['number'];
-            if ($T['isopen'])
-                $number = sprintf('<b>%s</b>', $number);
+            
 
-            $title = Format::truncate($title_field->display($title_field->to_php($T['cdata__title'])), 40);
-            ?>
-            <tr id="<?php echo $T['id']; ?>">
-                <?php
-                if ($thisstaff->canManageTickets()) {
-                    $sel = false;
-                    if ($ids && in_array($T['id'], $ids))
-                        $sel = true;
-                    ?>
-                <td align="center" class="nohover">
-                    <input class="ckb" type="checkbox" name="tids[]"
-                        value="<?php echo $T['id']; ?>" <?php echo $sel?'checked="checked"':''; ?>>
-                </td>
-                <?php } ?>
-                <td nowrap>
-                  <a class="preview"
-                    href="tasks.php?id=<?php echo $T['id']; ?>"
-                    data-preview="#tasks/<?php echo $T['id']; ?>/preview"
-                    ><?php echo $number; ?></a></td>
-                <td nowrap>
-                  <a class="preview"
-                    href="tickets.php?id=<?php echo $T['ticket__ticket_id']; ?>"
-                    data-preview="#tickets/<?php echo $T['ticket__ticket_id']; ?>/preview"
-                    ><?php echo $T['ticket__number']; ?></a></td>
-                <td align="center" nowrap><?php echo
-                Format::datetime($T[$date_col ?: 'created']); ?></td>
-                <td><a <?php if ($flag) { ?> class="Icon <?php echo $flag; ?>Ticket" title="<?php echo ucfirst($flag); ?> Ticket" <?php } ?>
-                    href="tasks.php?id=<?php echo $T['id']; ?>"><?php
-                    echo $title; ?></a>
-                     <?php
-                        if ($threadcount>1)
-                            echo "<small>($threadcount)</small>&nbsp;".'<i
-                                class="icon-fixed-width icon-comments-alt"></i>&nbsp;';
-                        if ($T['collab_count'])
-                            echo '<i class="icon-fixed-width icon-group faded"></i>&nbsp;';
-                        if ($T['attachment_count'])
-                            echo '<i class="icon-fixed-width icon-paperclip"></i>&nbsp;';
-                    ?>
-                </td>
-                <td nowrap>&nbsp;<?php echo Format::truncate($dept, 40); ?></td>
-                <td nowrap>&nbsp;<?php echo $assignee; ?></td>
-            </tr>
-            <?php
-            } //end of foreach
-        if (!$total)
-            $ferror=__('There are no tasks matching your criteria.');
-        ?>
-    </tbody>
-    <tfoot>
-     <tr>
-        <td colspan="7">
-            <?php if($total && $thisstaff->canManageTickets()){ ?>
-            <?php echo __('Select');?>:&nbsp;
-            <a id="selectAll" href="#ckb"><?php echo __('All');?></a>&nbsp;&nbsp;
-            <a id="selectNone" href="#ckb"><?php echo __('None');?></a>&nbsp;&nbsp;
-            <a id="selectToggle" href="#ckb"><?php echo __('Toggle');?></a>&nbsp;&nbsp;
-            <?php }else{
-                echo '<i>';
-                echo $ferror?Format::htmlchars($ferror):__('Query returned 0 results.');
-                echo '</i>';
-            } ?>
-        </td>
-     </tr>
-    </tfoot>
-    </table>
-    <?php
-    if ($total>0) { //if we actually had any tasks returned.
-        echo '<div>&nbsp;'.__('Page').':'.$pageNav->getPageLinks().'&nbsp;';
-        echo sprintf('<a class="export-csv no-pjax" href="?%s">%s</a>',
-                Http::build_query(array(
-                        'a' => 'export', 'h' => $hash,
-                        'status' => $_REQUEST['status'])),
-                __('Export'));
-        echo '&nbsp;<i class="help-tip icon-question-sign" href="#export"></i></div>';
-    } ?>
-    </form>
-</div>
-
-<div style="display:none;" class="dialog" id="confirm-action">
-    <h3><?php echo __('Please Confirm');?></h3>
-    <a class="close" href=""><i class="icon-remove-circle"></i></a>
-    <hr/>
-    <p class="confirm-action" style="display:none;" id="mark_overdue-confirm">
-        <?php echo __('Are you sure want to flag the selected tasks as <font color="red"><b>overdue</b></font>?');?>
-    </p>
-    <div><?php echo __('Please confirm to continue.');?></div>
-    <hr style="margin-top:1em"/>
-    <p class="full-width">
-        <span class="buttons pull-left">
-            <input type="button" value="<?php echo __('No, Cancel');?>" class="close">
-        </span>
-        <span class="buttons pull-right">
-            <input type="button" value="<?php echo __('Yes, Do it!');?>" class="confirm">
-        </span>
-     </p>
-    <div class="clear"></div>
-</div>
-<script type="text/javascript">
-$(function() {
-
-    $(document).off('.new-task');
-    $(document).on('click.new-task', 'a.new-task', function(e) {
-        e.preventDefault();
-        var url = 'ajax.php/'
-        +$(this).attr('href').substr(1)
-        +'?_uid='+new Date().getTime();
-        var $options = $(this).data('dialogConfig');
-        $.dialog(url, [201], function (xhr) {
-            var tid = parseInt(xhr.responseText);
-            if (tid) {
-                 window.location.href = 'tasks.php?id='+tid;
-            } else {
-                $.pjax.reload('#pjax-container');
-            }
-        }, $options);
-
-        return false;
-    });
-
-    $('[data-toggle=tooltip]').tooltip();
-});
-</script>
+            $my_tasks[$total_tasks]['title'] = Format::truncate($title_field->display($title_field->to_php($T['cdata__title'])), 40);
+            $total_tasks += 1;
+        }
+?>

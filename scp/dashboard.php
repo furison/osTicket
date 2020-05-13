@@ -46,7 +46,15 @@ $nav->setTabActive('dashboard');
 $ost->addExtraHeader('<meta name="tip-namespace" content="dashboard.dashboard" />',
     "$('#content').data('tipNamespace', 'dashboard.dashboard');");
 
-require(STAFFINC_DIR.'header.inc.php');
+//require(STAFFINC_DIR.'header.inc.php');
+$theme->renderHeader('staff', $ost, $cfg, $nav, $errors, $thisstaff);
 require_once(STAFFINC_DIR.'dashboard.inc.php');
-include(STAFFINC_DIR.'footer.inc.php');
+$theme->render('staff', 'dashboard', array(
+    'report'    => $report,
+    'plots'     => $plots,
+    'groups'    => $groups,
+    'range'     => $range,
+));
+//include(STAFFINC_DIR.'footer.inc.php');
+$theme->renderFooter('staff', $ost, $thisstaff)
 ?>

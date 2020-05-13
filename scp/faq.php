@@ -146,26 +146,88 @@ if ($_POST) {
     }
 }
 
-$inc='faq-categories.inc.php'; //FAQs landing page.
+
 if($faq && $faq->getId()) {
-    $inc='faq-view.inc.php';
+    
     if ($_REQUEST['a']=='edit'
-            && $thisstaff->hasPerm(FAQ::PERM_MANAGE))
-        $inc='faq.inc.php';
-    elseif ($_REQUEST['a'] == 'print')
+            && $thisstaff->hasPerm(FAQ::PERM_MANAGE)) {
+        require_once(STAFFINC_DIR.'faq.inc.php');
+        $template = 'faq';
+        $data = array(
+            'action'    => $action,
+            'info'      => $info,
+            'qs'        => $qs,
+            'topics'    =>$topics,
+            'langs'     => $langs,
+            'faq_form'  => $faq_form,
+            'submit_text'=> $submit_text,
+            'qstr'      => $qstr,
+            'thisstaff' => $thisstaff,
+            'cfg'       => $cfg,
+        );
+    }
+    elseif ($_REQUEST['a'] == 'print'){
         return $faq->printPdf();
+    }
+    else {
+        require_once(STAFFINC_DIR.'faq-view.inc.php');
+        $template = 'faq-view';
+        $data = array(
+            'faq'       => $faq,
+            'query'     => $query,
+            'category'  => $category,
+            'langs'     => $langs,
+            'otherlangs'=> $otherlangs,
+            'thisstaff' => $thisstaff,
+        );
+    }
 }elseif($_REQUEST['a']=='add'
         && $thisstaff->hasPerm(FAQ::PERM_MANAGE)) {
-    $inc='faq.inc.php';
+    require_once(STAFFINC_DIR.'faq.inc.php');
+    $template = 'faq';
+    $data = array(
+        'action'    => $action,
+        'info'      => $info,
+        'qs'        => $qs,
+        'topics'    =>$topics,
+        'langs'     => $langs,
+        'faq_form'  => $faq_form,
+        'submit_text'=> $submit_text,
+        'qstr'      => $qstr,
+        'thisstaff' => $thisstaff,
+        'cfg'       => $cfg,
+    );
 } elseif($category && $_REQUEST['a']!='search') {
-    $inc='faq-category.inc.php';
+    require_once(STAFFINC_DIR.'faq-category.inc.php');
+    $template = 'faq-category';
+    $data = array(
+        'category'  => $category,
+        'faqs'      => $faqs,
+        'thisstaff' => $thisstaff
+    );
 }
+else{
+    require_once(STAFFINC_DIR.'faq-categories.inc.php'); //FAQs landing page.
+    $template = 'faq-categories';
+    $data = array(
+        'total'         => $total,
+        'categories'    => $categories,
+        'topics'        => $topics,
+        'faqs'          => $faqs,
+        'categories2'   => $categories2,
+        'thisstaff'     => $thisstaff
+    );
+}
+
 $tip_namespace = 'knowledgebase.faq';
 $nav->setTabActive('kbase');
 $ost->addExtraHeader('<meta name="tip-namespace" content="' . $tip_namespace . '" />',
     "$('#content').data('tipNamespace', '".$tip_namespace."');");
-require_once(STAFFINC_DIR.'header.inc.php');
-require_once(STAFFINC_DIR.$inc);
+//require_once(STAFFINC_DIR.'header.inc.php');
+$theme->renderHeader('staff', $ost, $cfg, $nav, $errors, $thisstaff);
+//require_once(STAFFINC_DIR.$inc);
+$theme->render('staff', $template, $data);
 print $faq_form->getMedia();
-require_once(STAFFINC_DIR.'footer.inc.php');
+//require_once(STAFFINC_DIR.'footer.inc.php');
+$theme->renderFooter($type, $ost, $thisstaff = null)
 ?>

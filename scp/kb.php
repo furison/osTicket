@@ -20,14 +20,35 @@ $category=null;
 if($_REQUEST['cid'] && !($category=Category::lookup($_REQUEST['cid'])))
     $errors['err']=__('Unknown or invalid FAQ category');
 
-$inc='faq-categories.inc.php'; //KB landing page.
+
 if($category && $_REQUEST['a']!='search') {
-    $inc='faq-category.inc.php';
+    require_once(STAFFINC_DIR.'faq-category.inc.php');
+    $template = 'faq-category';
+    $data = array(
+        'category'  => $category,
+        'faqs'      => $faqs,
+        'thisstaff' => $thisstaff
+    );
+} else {
+    //KB landing page.
+    $template ='faq-categories';
+    require_once(STAFFINC_DIR.'faq-categories.inc.php');
+    $data = array(
+        'total'         => $total,
+        'categories'    => $categories,
+        'topics'        => $topics,
+        'faqs'          => $faqs,
+        'categories2'   => $categories2,
+        'thisstaff'     => $thisstaff
+    );
 }
 $nav->setTabActive('kbase');
 $ost->addExtraHeader('<meta name="tip-namespace" content="knowledgebase.faqs" />',
     "$('#content').data('tipNamespace', 'knowledgebase.faqs');");
-require_once(STAFFINC_DIR.'header.inc.php');
-require_once(STAFFINC_DIR.$inc);
-require_once(STAFFINC_DIR.'footer.inc.php');
+//require_once(STAFFINC_DIR.'header.inc.php');
+$theme->renderHeader('staff',  $ost, $cfg, $nav, $errors, $thisstaff);
+//require_once(STAFFINC_DIR.$inc);
+$theme->render('staff', $template, $data);
+//require_once(STAFFINC_DIR.'footer.inc.php');
+$theme->renderFooter('staff', $ost, $thisstaff);
 ?>

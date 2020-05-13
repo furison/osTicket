@@ -215,28 +215,111 @@ $ost->addExtraHeader('<meta name="tip-namespace" content="tasks.queue" />',
 if($task) {
     $ost->setPageTitle(sprintf(__('Task #%s'),$task->getNumber()));
     $nav->setActiveSubMenu(-1);
-    $inc = 'task-view.inc.php';
+
+    $role = $thisstaff->getRole($task->getDept());
+
     if ($_REQUEST['a']=='edit'
             && $task->checkStaffPerm($thisstaff, TaskModel::PERM_EDIT)) {
-        $inc = 'task-edit.inc.php';
         if (!$forms) $forms=DynamicFormEntry::forObject($task->getId(), 'A');
         // Auto add new fields to the entries
-        foreach ($forms as $f) $f->addMissingFields();
-    } elseif($_REQUEST['a'] == 'print' && !$task->pdfExport($_REQUEST['psize']))
+        foreach ($forms as $f) {
+            $f->addMissingFields();
+        }
+        $template = 'task-edit';
+        require_once(STAFFINC_DIR. 'task-edit.inc.php');
+        $data = array(
+            'forms'     => $forms,
+            'errors'    => $errors,
+            'info'      => $info,
+            'cfg'       => $cfg,
+        );
+    } elseif($_REQUEST['a'] == 'print' && !$task->pdfExport($_REQUEST['psize'])) {
         $errors['err'] = __('Unable to print to PDF.')
             .' '.__('Internal error occurred');
+
+            $template = 'task-view';
+            require_once(STAFFINC_DIR.'task-view.inc.php');
+            $data = array(
+                'errors'    => $errors,
+                'object'    => $object,
+                'task'      => $task,
+                'ticket'    => $ticket,
+                'title'     => $title,
+                'thread'    => $thread,
+                'dept'      => $dept,
+                'canClose'  => $canClose,
+                'role'      => $role,
+                'mylock'    => $mylock,
+                'reply_attachments_form' => $reply_attachments_form,
+                'actions'   => $actions,
+                'thisstaff' => $thisstaff,
+                'cfg'       => $cfg,
+            );
+    } else {
+        $template = 'task-view';
+        require_once(STAFFINC_DIR.'task-view.inc.php');
+        $data = array(
+            'object'    => $object,
+            'task'      => $task,
+            'ticket'    => $ticket,
+            'title'     => $title,
+            'thread'    => $thread,
+            'dept'      => $dept,
+            'canClose'  => $canClose,
+            'role'      => $role,
+            'mylock'    => $mylock,
+            'reply_attachments_form' => $reply_attachments_form,
+            'actions'   => $actions,
+            'thisstaff' => $thisstaff,
+            'cfg'       => $cfg,
+        );
+    }
 } else {
-	$inc = 'tasks.inc.php';
+    $template = 'tasks';
     if ($_REQUEST['a']=='open' &&
-            $thisstaff->hasPerm(Task::PERM_CREATE, false))
+            $thisstaff->hasPerm(Task::PERM_CREATE, false)){
         $inc = 'task-open.inc.php';
-    elseif($_REQUEST['a'] == 'export') {
+    } elseif($_REQUEST['a'] == 'export') {
         $ts = strftime('%Y%m%d');
         if (!($query=$_SESSION[':Q:tasks']))
             $errors['err'] = __('Query token not found');
-        elseif (!Export::saveTasks($query, "tasks-$ts.csv", 'csv'))
+        elseif (!Export::saveTasks($query, "tasks-$ts.csv", 'csv')) {
             $errors['err'] = __('Unable to dump query results.')
                 .' '.__('Internal error occurred');
+        }
+        require_once(STAFFINC_DIR.'tasks.inc.php');
+        $data = array(
+            'errors'                => $errors,
+            'queue_sort_options'    => $queue_sort_options,
+            'sort_options'          => $sort_options, 
+            'sort_cols'             => $sort_cols, 
+            'sort_dir'              => $sort_dir,
+            'refresh_url'           => $refresh_url,
+            'count'                 => $count,
+            'args'                  => $args,
+            'tasks'                 => $my_tasks,
+            'total tasks'           => $total_tasks,
+            'queue_columns'         => $queue_columns,
+            'date_col'              => $date_col,
+            'thisstaff'             => $thisstaff,
+        );
+    }
+    else {
+        require_once(STAFFINC_DIR.'tasks.inc.php');
+        $data = array(
+            'queue_sort_options'    => $queue_sort_options,
+            'sort_options'          => $sort_options, 
+            'sort_cols'             => $sort_cols, 
+            'sort_dir'              => $sort_dir,
+            'refresh_url'           => $refresh_url,
+            'count'                 => $count,
+            'args'                  => $args,
+            'tasks'                 => $my_tasks,
+            'total tasks'           => $total_tasks,
+            'queue_columns'         => $queue_columns,
+            'date_col'              => $date_col,
+            'thisstaff'             => $thisstaff,
+        );
     }
 
     //Clear active submenu on search with no status
@@ -253,6 +336,6 @@ if($task) {
     }
 }
 
-require_once(STAFFINC_DIR.'header.inc.php');
-require_once(STAFFINC_DIR.$inc);
-require_once(STAFFINC_DIR.'footer.inc.php');
+$theme->renderHeader('staff', $ost, $cfg, $nav, null, $thisstaff);
+$theme->render('staff', $template, $data);
+$theme->renderFooter('staff', $ost, $thisstaff);

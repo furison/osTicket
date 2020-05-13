@@ -56,7 +56,7 @@ if (isset($options['entry']) && $options['mode'] == 'edit'): ?>
                 <?php if (!$field->isBlockLevel() && $field->isRequiredForStaff()): ?>
                     <span class="error">*</span>
                 <?php endif; ?>
-                <? if ($field->isStorable() && ($a = $field->getAnswer()) && $a->isDeleted()): ?>
+                <?php if ($field->isStorable() && ($a = $field->getAnswer()) && $a->isDeleted()): ?>
                     <a class="action-button float-right danger overlay" title="Delete this data"
                         href="#delete-answer"
                         onclick="javascript:if (confirm('<?= __('You sure?'); ?>'))
@@ -81,7 +81,7 @@ if (isset($options['entry']) && $options['mode'] == 'edit'): ?>
                 <?php if ($field->get('hint') && !$field->isBlockLevel()): ?>
                     <br /><em style="color:gray;display:inline-block">
                     <?= Format::viewableImages($field->getLocal('hint')); ?></em>
-                <?php endif ?>
+                <?php endif; ?>
                 <?php foreach ($field->errors() as $e): ?>
                     <div class="error"><?php echo Format::htmlchars($e); ?></div>
                 <?php endforeach; ?>

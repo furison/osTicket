@@ -59,7 +59,8 @@
         <?php //TODO handle dynamic forms
         $options = array('mode' => 'create');
         foreach ($forms as $form) {
-            include(CLIENTINC_DIR . 'templates/dynamic-form.tmpl.php');
+            $form->render($options);
+            //include(CLIENTINC_DIR . 'templates/dynamic-form.tmpl.php');
         } ?>
     </tbody>
     <tbody>

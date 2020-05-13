@@ -107,15 +107,21 @@ if ($_POST) {
             .' '.__('Internal error occurred');
 }
 
-$page = 'orgs.inc.php';
 if ($org) {
-    $page = 'org-view.inc.php';
     switch (strtolower($_REQUEST['t'])) {
     case 'tickets':
         if (isset($_SERVER['HTTP_X_PJAX'])) {
-            $page='templates/tickets.tmpl.php';
             $pjax_container = @$_SERVER['HTTP_X_PJAX_CONTAINER'];
-            require(STAFFINC_DIR.$page);
+            require(STAFFINC_DIR.'tickets.inc.php');
+            $this->render('staff', 'tickets', array(
+                'user'      => $user,
+                'tickets'   => $tickets,
+                'queue'     => $queue,
+                'total'     => $total,
+                'page'      =>$page,
+                'pageNav'   => $pageNav,
+                'org'       => $org,
+            ));
             return;
         } elseif ($_REQUEST['a'] == 'export' && ($query=$_SESSION[':O:tickets'])) {
             $filename = sprintf('%s-tickets-%s.csv',
@@ -126,10 +132,42 @@ if ($org) {
         }
         break;
     }
+    $template = 'org-view';
+    $data = array(
+        'total'     => $total,
+        'pageNav'   => $pagenav,
+        'org'       => $org,
+        'qstr'      => $qstr,
+        'qhash'     => $qhash,
+        'name_sort' => $name_sort,
+        'status_sort'=> $status_sort,
+        'create_sort'=> $create_sort,
+        'update_sort'=> $update_sort,
+        'errors'    => $errors,
+        'thisstaff' => $thisstaff,
+        'cfg'       => $cfg,
+    );
+}
+else {
+    include (STAFFINC_DIR.'orgs.inc.php');
+    $template = 'orgs';
+    $data = array(
+        'orgs'          => $orgs,
+        'name_sort'     => $name_sort,
+        'qstr'          => $qstr,
+        'users_sort'    => $users_sort,
+        'create_sort'   => $create_sort,
+        'update_sort'   => $update_sort,
+        'errors'        => $errors,
+        'thisstaff'     => $thisstaff,
+    );
 }
 
 $nav->setTabActive('users');
-require(STAFFINC_DIR.'header.inc.php');
-require(STAFFINC_DIR.$page);
-include(STAFFINC_DIR.'footer.inc.php');
+//require(STAFFINC_DIR.'header.inc.php');
+$theme->renderHeader('staff', $ost, $cfg, $nav, $errors, $thisstaff);
+//require(STAFFINC_DIR.$page);
+$theme->render('staff', $template, $data);
+//include(STAFFINC_DIR.'footer.inc.php');
+$theme->renderFooter('staff', $ost, $thisstaff)
 ?>

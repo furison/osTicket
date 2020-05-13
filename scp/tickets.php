@@ -486,16 +486,47 @@ $ost->addExtraHeader('<meta name="tip-namespace" content="tickets.queue" />',
 if($ticket) {
     $ost->setPageTitle(sprintf(__('Ticket #%s'),$ticket->getNumber()));
     $nav->setActiveSubMenu(-1);
-    $inc = 'ticket-view.inc.php';
+    require_once(STAFFINC_DIR.'ticket-view.inc.php');
+    $template = 'ticket-view';
+    $data = array(
+        'role'          => $role,
+        'dept'          => $dept,
+        'ticket'        => $ticket,
+        'subject_field' => $subject_field,
+        'children'      => $children,
+        'user'          => $user,
+        'response_form' => $response_form,
+        'note_form'     => $note_form,
+        'thisstaff'     => $thisstaff,
+        'cfg'           => $cfg,
+
+    );
     if ($_REQUEST['a']=='edit'
             && $ticket->checkStaffPerm($thisstaff, Ticket::PERM_EDIT)) {
-        $inc = 'ticket-edit.inc.php';
+        $template = 'ticket-edit';
         if (!$forms) $forms=DynamicFormEntry::forTicket($ticket->getId());
         // Auto add new fields to the entries
         foreach ($forms as $f) {
             $f->filterFields(function($f) { return !$f->isStorable(); });
             $f->addMissingFields();
         }
+        $info = Format::htmlchars(($errors && $_POST)?$_POST:$ticket->getUpdateInfo());
+        if ($_POST) {
+            // Reformat duedate to the display standard (but don't convert to local
+            // timezone)
+            $info['duedate'] = Format::date(strtotime($info['duedate']), false, false, 'UTC');
+        }
+        $user = null;
+        if(!$info['user_id'] || !($user = User::lookup($info['user_id']))) {
+            $user = $ticket->getUser();
+        }
+        $data = array(
+            'forms' => $forms,
+            'info'  => $info,
+            'user'  => $user,
+            'ticket'=> $ticket,
+            'cfg'   => $cfg,
+        );
     } elseif($_REQUEST['a'] == 'print') {
         if (!extension_loaded('mbstring'))
             $errors['err'] = sprintf('%s %s',
@@ -518,16 +549,36 @@ if($ticket) {
               .' '.__('Internal error occurred');
     }
 } else {
-    $inc = 'templates/queue-tickets.tmpl.php';
     if ($_REQUEST['a']=='open' &&
             $thisstaff->hasPerm(Ticket::PERM_CREATE, false)) {
-        $inc = 'ticket-open.inc.php';
+        require (STAFFINC_DIR.'ticket-open.inc.php');
+        $template = 'ticket-open';
+        $data = array(
+            'info'          => $info,
+            'response_form' => $response_form,
+            'forms'         => $forms,
+            'errors'        => $errors,
+            'thisstaff'     => $thisstaff,
+            'cfg'           => $cfg,
+        );
     } elseif ($queue) {
         // XXX: Check staff access?
         $quick_filter = @$_REQUEST['filter'];
         $tickets = $queue->getQuery(false, $quick_filter);
+        require_once(STAFFINC_DIR.'queue-tickets.inc.php');
+        $template = 'queue-tickets';
+        $data = array(
+            'queue'         => $queue,
+            'count'         => $count,
+            'status'        => $status,
+            'columns'       => $columns,
+            'tickets'       => $tickets,
+            'refresh_url'   => $refresh_url,
+            'pageNav'       => $pageNav,
+            'thisstaff'     => $thisstaff,
+        );
     }
-
+    
     //set refresh rate if the user has it configured
     if(!$_POST && !$_REQUEST['a'] && ($min=(int)$thisstaff->getRefreshRate())) {
         $js = "+function(){ var qq = setInterval(function() { if ($.refreshTicketView === undefined) return; clearInterval(qq); $.refreshTicketView({$min}*60000); }, 200); }();";
@@ -536,7 +587,7 @@ if($ticket) {
     }
 }
 
-require_once(STAFFINC_DIR.'header.inc.php');
-require_once(STAFFINC_DIR.$inc);
+$theme->renderHeader('staff', $ost, $cfg, $nav, null, $thisstaff);
+$theme->render('staff', $template, $data);
 print $response_form->getMedia();
-require_once(STAFFINC_DIR.'footer.inc.php');
+$theme->renderFooter('staff', $ost, $thisstaff);

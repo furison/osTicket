@@ -146,16 +146,44 @@ if($_POST){
     }
 }
 
-$page='categories.inc.php';
 $tip_namespace = 'knowledgebase.category';
 if($category || ($_REQUEST['a'] && !strcasecmp($_REQUEST['a'],'add'))) {
-    $page='category.inc.php';
+    require(STAFFINC_DIR.'category.inc.php');
+    $template = 'category';
+    $data = array(
+        'info'      => $info,
+        'action'    => $action,
+        'errors'    => $errors,
+        'langs'     => $langs,
+        'submit_text' => $submit_text,
+        'thisstaff' => $thisstaff,
+        'cfg'       => $cfg
+    );
+}
+else {
+    require(STAFFINC_DIR.'categories.inc.php');
+    $template = 'categories';
+    $data = array(
+        'name_sort'     => $name_sort,
+        'type_sort'     => $type_sort,
+        'faqs_sort'     => $faqs_sort,
+        'updated_sort'  => $updated_sort,
+        'qstr'          => $qstr,
+        'categories'    => $categories,
+        'ids'           => $ids,
+        'total'         => $total,
+        'pageNav'       => $pageNav,
+        'thisstaff'     => $thisstaff
+    );
 }
 
 $nav->setTabActive('kbase');
 $ost->addExtraHeader('<meta name="tip-namespace" content="' . $tip_namespace . '" />',
     "$('#content').data('tipNamespace', '".$tip_namespace."');");
-require(STAFFINC_DIR.'header.inc.php');
-require(STAFFINC_DIR.$page);
-include(STAFFINC_DIR.'footer.inc.php');
+//require(STAFFINC_DIR.'header.inc.php');
+$theme->renderHeader('staff', $ost, $cfg, $nav, $errors, $thisstaff);
+//require(STAFFINC_DIR.$page);
+$theme->render('staff', $template,$data);
+//include(STAFFINC_DIR.'footer.inc.php');
+$theme->renderFooter('staff', $ost, $thisstaff)
 ?>

@@ -29,7 +29,6 @@ if ($activeMenu>0 && !isset($subnav[$activeMenu-1]))
         <ul id="sub_nav">
         <?php foreach($subnav as $k=> $item):?>
             <?php if (is_callable($item)) {
-                echo 'callable';
                 if ($item($nav) && !$activeMenu)
                     $activeMenu = 'x';
                 continue;
@@ -57,8 +56,7 @@ if ($activeMenu>0 && !isset($subnav[$activeMenu-1]))
                 foreach ($item['attr'] as $name => $value) {
                     $attr.=  sprintf("%s='%s' ", $name, $value);
                 }
-            }
-            echo $class;?>
+            } ?>
             <li><a class="<?= $class ?>" href="<?= $item['href'];?>" title="<?= $item['title'];?>" id="<?= $id; ?>" <?= $attr; ?>><?= $item['desc'];?></a></li>
             
         <?php endforeach; ?>

@@ -47,12 +47,27 @@ if($thisstaff->forcePasswdChange() && !$errors['err'])
 elseif($thisstaff->onVacation() && !$warn)
     $warn=sprintf(__("<b>Welcome back %s</b>! You are listed as 'on vacation' Please let your manager know that you are back."),$thisstaff->getFirstName());
 
-$inc='profile.inc.php';
+//$inc=;
 if ($nav)
     $nav->setTabActive('dashboard');
 $ost->addExtraHeader('<meta name="tip-namespace" content="dashboard.my_profile" />',
     "$('#content').data('tipNamespace', 'dashboard.my_profile');");
-require_once(STAFFINC_DIR.'header.inc.php');
-require(STAFFINC_DIR.$inc);
-require_once(STAFFINC_DIR.'footer.inc.php');
+//require_once(STAFFINC_DIR.'header.inc.php');
+$theme->renderHeader('staff', $ost, $cfg, $nav, $errors, $thisstaff);
+//require(STAFFINC_DIR.$inc);
+require(STAFFINC_DIR.'profile.inc.php');
+$theme->render('staff', 'profile', array(
+        'avatar'    => $avatar,
+        'pagelimit' => $pagelimit,
+        'queues'    => $queues,
+        'datetime_format' => $datetime_format,
+        'langs'     => $langs,
+        'queues'    => $queues,
+        'options'   => $options,
+        'staff'     => $staff,
+        'thisstaff' => $thisstaff,
+        'cfg'       => $cfg,
+));
+//require_once(STAFFINC_DIR.'footer.inc.php');
+$theme->renderFooter('staff', $ost, $thisstaff);
 ?>

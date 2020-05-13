@@ -3,7 +3,7 @@
     class.theme.php
 
     Themes system
-    Furison/Alex Antrobus
+    Furison
     Copyright (c)  2006-2020 osTicket
     http://www.osticket.com
 
@@ -40,10 +40,10 @@ echo $template_file;
 
         //check file exists and include
         if (file_exists($template_file)) {
-            include($template_file);
+            require($template_file);
         }
         else {
-            trigger_error(sprintf('Template %s - %s not found in %s', $template_type, $template, $template_file), E_USER_ERROR);
+           trigger_error(sprintf('Template %s - %s not found in %s', $template_type, $template, $template_file), E_USER_ERROR);
         }
     }
 
@@ -161,14 +161,14 @@ echo $template_file;
     {   
         $TZ_ALLOW_DEFAULT = ($TZ_ALLOW_DEFAULT != null) ? $TZ_ALLOW_DEFAULT : true;
         $TZ_PLACEHOLDER = $TZ_PLACEHOLDER !=null ?: __('System Default');
-        
+    echo 'timezone.tmpl.php';
         //check file exists and include
         $theme_dir = $this->themes_dir .'/'. $this->current_theme;
         if (file_exists($theme_dir .'/timezone.tmpl.php')) {
             include($theme_dir .'/timezone.tmpl.php');
         }
         else {
-            trigger_error(sprintf('Template %s - %s not found in %s.', $template_type, 'header', $template_file), E_USER_ERROR);
+            trigger_error(sprintf('Template %s - %s not found in %s.', 'default', 'timezone', $theme_dir.'/timezone.tmpl.php'), E_USER_ERROR);
         }
     }
 }
