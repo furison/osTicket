@@ -53,7 +53,6 @@ if ($info['topicId'] && ($topic=Topic::lookup($info['topicId']))) {
 if ($_POST)
     $info['duedate'] = Format::date(strtotime($info['duedate']), false, false, 'UTC');
 ?>
-?>
 <form action="tickets.php?a=open" method="post" class="save"  enctype="multipart/form-data">
  <?php csrf_token(); ?>
  <input type="hidden" name="do" value="create">
